@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>网站运营统计 - 总览</title>
+    <!-- 引入 echarts.js -->
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+</head>
+<body>
+
+
+
+    <div id="getAllCountIp" style="left: 50%">历史独立IP访问总人数: </div>
+    <div id="getAllCountLogName"  style="height:500px;"></div>
+    <div id="getAllCountLogContent" style="height:600px;"></div>
+
+
+    <script type="text/javascript">
+
+        // 基于准备好的dom，初始化echarts实例
+        var myChartgetAllCountLogName = echarts.init(document.getElementById('getAllCountLogName'));
+        var myChart = echarts.init(document.getElementById('getAllCountLogContent'));
+
+
+        $(function () {
+            getAllCountIp();
+            getAllCountLogName();
+            getAllCountLogContent();
+        });
+
+
+
+        function getAllCountIp(){
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getAllCountIp",
+                // data:{
+                //     cardno:cardno,
+                // },
+                async:false,
+                success:function(msg){
+                    console.log(msg);
+                    $("#getAllCountIp").append(msg.all_count_ip);
+                }
+            });
+        };
+
+
+        function getAllCountLogName(){
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getAllCountLogName",
+                async:false,
+                success:function(msg){
+                    msg = msg.slice(0,10)
+                    data_name = []
+                    data_value = []
+                    for (const key in msg) {
+                        data_name.push(msg[key].name),
+                        data_value.push(msg[key].value)
+                    }
+                }
+            });
+            // 使用刚指定的配置项和数据显示图表。
+            myChartgetAllCountLogName.setOption({
+                title: {
+                    left: 'center',
+                    text: '获取所有LogName搜索字段top20'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: data_name
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    data: data_value,
+                    type: 'line'
+                }]
+            });
+        };
+
+
+
+        function getAllCountLogContent(){
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getAllCountLogContent",
+                async:false,
+                success:function(msg){
+                    x_list = msg;
+                    console.log(msg);
+                }
+            });
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption({
+                title: {
+                    left: 'center',
+                    text: '获取所有LogContent行为字段的top11'
+                },
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    top: '5%',
+                    left: 'center'
+                },
+                series: [
+                    {
+                        name: '访问来源',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '40',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: x_list
+                    }
+                ]
+            });
+
+
+        };
+
+
+    </script>
+
+
+</body>
+
+</html>
+
+

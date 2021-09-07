@@ -1,0 +1,88 @@
+
+
+
+
+# 总 独立ip总人数，ip去重
+SELECT COUNT(*)  as all_count_ip from (SELECT log_ip FROM web_log GROUP BY log_ip)as count_ip;
+
+# 总 热词搜索前20条 log_name
+SELECT log_name, COUNT(*) from web_log GROUP BY log_name ORDER BY COUNT(*) DESC limit 0,20;
+
+# 总 用户行为排序 log_content
+SELECT log_content, COUNT(*) from web_log GROUP BY log_content ORDER BY COUNT(*) DESC limit 0,11;
+
+
+# 总 按天筛选每天ip总数，ip未去重
+select date_format(log_time, '%Y-%m-%d') dat, count(*) ip from web_log group by date_format(log_time, '%Y-%m-%d');
+
+
+
+
+
+# 单 查询某时间独立用户访问用户ip总人数，ip已去重
+SELECT COUNT(*)  from (SELECT log_ip FROM web_log where log_time > "2021-8-12"  and log_time < "2021-08-13"  GROUP BY log_ip)as count_ip;
+
+
+# 单 查询某时间热词搜索前20条 log_name
+SELECT log_name, COUNT(*) from web_log where log_time > "2021-8-12" and log_time < "2021-08-13"   GROUP BY log_name ORDER BY COUNT(*) DESC limit 0,20;
+
+
+# 单 查询某时间用户行为排序log_content次数
+SELECT log_content, COUNT(*) from web_log where log_time > "2021-8-12" and log_time < "2021-08-13"   GROUP BY log_content ORDER BY COUNT(*) DESC limit 0,11;
+
+
+# 单 查询用户某时间段每天访问ip总数，ip未去重
+select date_format(log_time, '%Y-%m-%d') dat, count(*) ip from web_log   where log_time > "2021-08-11" and log_time < "2021-08-13"  group by date_format(log_time, '%Y-%m-%d');
+
+
+# 单 查询用户某时间断每天独立访问ip总数
+SELECT
+	result.dat,
+	count( result.num ) AS num
+FROM
+	(
+	SELECT
+		date_format( log_time, '%Y-%m-%d' ) dat,
+		count( log_ip ) num
+	FROM
+		web_log
+	WHERE
+		log_time > "2021-08-5"
+		AND log_time < "2021-08-12"
+	GROUP BY
+		date_format( log_time, '%Y-%m-%d' ),
+		log_ip
+	) AS result
+GROUP BY
+	result.dat
+
+
+
+# 单 查询最近7天的每天独立访问ip总数
+SELECT
+	a.time date,
+	count( DISTINCT log_ip ) countip
+FROM
+	(
+	SELECT
+		id,
+		DATE_FORMAT( log_time, '%Y-%m-%d' ) 'time',
+		log_name,
+		log_ip,
+		log_content,
+		user_agent,
+		submit_name,
+		is_delete
+	FROM
+		web_log
+	WHERE
+		(
+		DATE_SUB( CURDATE(), INTERVAL 7 DAY ) <= date( log_time ))
+		AND is_delete = 1
+	) a
+GROUP BY
+	a.time;
+
+
+
+
