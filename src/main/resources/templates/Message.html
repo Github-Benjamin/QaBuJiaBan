@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>留言展示</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js" ></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <style>
+        table
+        {
+            table-layout:fixed;
+        }
+        td
+        {
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            overflow:hidden;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<nav class="nav navbar-inverse" role="navigotion" style="background:black">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a href="/" class="navbar-brand">QAbujiaban.com（QA不加班）</a>
+        </div>
+        <ul class="nav navbar-nav  navbar-right">
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span>简介<b class="caret"></b></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">劳动者不加班无需理由</a></li>
+                    <li><a href="#">鄙视我的人这么多，你算老几?</a></li>
+                    <li><a href="#">不要和我比懒，我懒得和你比</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-9" style="padding-top: 1%">
+
+            <ul id="main-nav" class="nav nav-tabs nav-stacked collapse navbar-collapse">
+                <li class="active">
+                    <a href="#"><H2>《QA不加班》留言板</H2></a>
+                </li>
+            </ul>
+
+
+            <table class="table table-hover" style="text-align: center">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">ID</th>
+                        <th style="text-align: center">用户名</th>
+                        <th class="col-lg-6" style="text-align: center">留言内容</th>
+                        <th style="text-align: center">城市</th>
+                        <th style="text-align: center">时间</th>
+                    </tr>
+                </thead>
+
+                <tbody id="pageData">
+                    <tr><td colspan=8></td></tr>
+                </tbody>
+
+            </table>
+
+            <div>
+                <ul class="pagination pagination-sm" id="setPageNum">
+                </ul>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-2 column" style="padding-top: 1%;padding-left: 2%">
+
+                <div align="center">
+                    <h3>写留言</h3>
+                </div>
+
+                <div class="modal-title" style="padding: 20px 0">
+                    <label class="modal-title">用户名:</label>
+                    <input type="text" id="message_user" class="form-control" placeholder="用户名">
+                </div>
+
+
+                <div class="modal-title">
+                    <label>请输入留言内容:</label>
+                    <textarea type="text" id="message_content" placeholder="请输入留言内容" style="width: 160%;height: 450px"></textarea>
+                </div>
+
+                <div class="modal-title form-inline form-group" style="padding: 20px 0" >
+                    <label for="textCode">验证码:  </label>
+                    <input type="text" id="textCode" class="form-control" placeholder="验证码" style="width: 35%;height: 30%" maxlength="4"/>
+                    <img id="imageCode" for="textCode" src="imageVerify" onclick="$(this).prop('src', 'imageVerify?' + Math.random())"/>
+                </div>
+
+                <input type="button" class="btn btn-primary" value="提交" onclick="verify()"/>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div style="height: 50px"></div>
+<div class="footer navbar-fixed-bottom"  style="background: black">
+    <div style="height: 15px"></div>
+    <ul class="list-inline text-center">
+        <li style="color: snow;font-size: 20px">
+            <a href="https://github.com/Github-Benjamin" target="_blank">Copyright ©2017.Benjamin Software All Rights Reserved.</a>
+        </li>
+    </ul>
+</div>
+<div style="height: 15px"></div>
+
+
+
+    <script>
+
+        // 页面默认启动加载数据
+        $(function () {
+            getMessageInfo();
+        });
+
+
+        // 获取页面数据
+        function getMessageInfo(pageNum=1) {
+            $.ajax({
+                type: "POST",
+                url: 'getMessageStatusPageInfo',
+                async:false,
+                data: {
+                    pageNum:pageNum,
+                },
+                success: function (data) {
+                    pageNum = data.pageNum;
+                    totalPages = data.totalPages;
+                    messageList = data.message;
+                },
+                error: function (data) {
+                    alert("系统错误，删除失败");
+                }
+            });
+
+            setPageNum(pageNum,totalPages);
+            setPageData(messageList);
+
+        }
+
+        // 设置页面数据
+        function setPageData(messageList) {
+            if(messageList.length == 0){
+                var html = "<tr><td colspan=8>暂无数据</td></tr>";
+            }else{
+                var html = null;
+                var editId = null;
+                for (const key in messageList) {
+                    html += "<tr id=\"tr"+ messageList[key].id  +"\">"
+                    html += "<td>" + messageList[key].id + "</td>",
+                    html += "<td>" + messageList[key].message_user + "</td>",
+                    html += "<td title=\""+ messageList[key].message_content  +"\">" + messageList[key].message_content + "</td>",
+                    html += "<td>" + messageList[key].message_city + "</td>",
+                    html += "<td>" + messageList[key].message_time + "</td>"
+                }
+            }
+            $("#pageData").html(html);
+
+        }
+
+
+        // 设置分页信息
+        function setPageNum(pageNum,totalPages) {
+
+
+            // 上一页
+            if(pageNum-1 < 1){
+                var beginHtml = "<li><a href=\"#\" onclick=\"getMessageInfo(1)\">&laquo;</a></li>";
+            }else {
+                var setPage = parseInt(pageNum) - 1;
+                var beginHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ setPage +")\">&laquo;</a></li>";
+            }
+
+            // 下一页
+            if( pageNum+1 >= totalPages){
+                var endHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ totalPages +")\">&raquo;</a></li>";
+            }else {
+                var setPage = parseInt(pageNum) + 1;
+                var endHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ setPage +")\">&raquo;</a></li>";
+            }
+
+
+
+
+            // 分页   <1.2.3>   <15……18>
+            if(  totalPages <= 10 ){
+                for( var i = 1; i <= totalPages ; i += 1 ){
+                    if(i == pageNum){
+                        beginHtml += "<li class=\"active\"><a href=\"#\ onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                    }else {
+                        beginHtml += "<li><a href=\"#\" onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                    }
+                }
+            }else {
+                var benginPage = pageNum - 5;
+                var endPage = pageNum + 5;
+                if(benginPage <=0){
+                    benginPage = 1;
+                }
+                if(endPage => pageNum){
+                    endPage = totalPages
+                }
+
+                for(benginPage; i<= endPage; benginPage+=1 ){
+                    if(i == pageNum){
+                        beginHtml += "<li class=\"active\"><a href=\"#\ onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                    }else {
+                        beginHtml += "<li><a href=\"#\" onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                    }
+                }
+
+            }
+            $("#setPageNum").html(beginHtml+endHtml);
+        }
+
+
+        function verify() {
+            var code = $('#textCode').val();
+            var message_user = $('#message_user').val();
+            var message_content = $('#message_content').val();
+
+            if (code.length == 0 || message_user.length == 0 || message_content.length == 0){
+                alert("录入数据不全，请检查输入输入是否正确？");
+            }else {
+                $.ajax({
+                    async: false,
+                    type: 'post',
+                    url: 'verify',
+                    dataType: "json",
+                    data: {
+                        code: code,
+                        message_user: message_user,
+                        message_content: message_content
+                    },
+                    success: function (result) {
+                        if (result.message == "成功") {
+                            alert("提交： " + result.message );
+                        } else {
+                            alert("\n提交失败： " + result.message + "\n\n请重新点击验证码图片刷新输入");
+                        }
+                        $("#imageCode").prop("src", 'imageVerify?' + Math.random());
+                    }
+                });
+            }
+
+        }
+
+
+
+    </script>
+
+</body>
+
+</html>
+

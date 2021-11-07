@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>网站运营统计 - 按时间段预览</title>
+    <!-- 引入 echarts.js -->
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/laydate/laydate.js"></script>
+</head>
+<body>
+
+    <div>
+        <input type="text" id="begin">
+        <input type="text" id="end">
+        <input type="button" id="subbtn" value="查询">
+        <div id="getDayCountIP"  style="left: 50%"></div>
+        <div id="getEveryDayIP" style="height:600px;"></div>
+        <div id="getDayCountLogName"  style="height:500px;"></div>
+        <div id="getDayCountLogContent"  style="height:500px;"></div>
+    </div>
+
+
+    <script type="text/javascript">
+
+        // 基于准备好的dom，初始化echarts实例
+        var myChartgetDayCountLogName = echarts.init(document.getElementById('getDayCountLogName'));
+        var myChartgetDayCountLogContent = echarts.init(document.getElementById('getDayCountLogContent'));
+        var myChartgetEveryDayIP = echarts.init(document.getElementById('getEveryDayIP'));
+
+
+        //执行一个laydate实例 日期选择
+        laydate.render({
+            elem: '#begin'//指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end'//指定元素
+        });
+
+
+        var getDayDict = getDayDict();
+        var begin = getDayDict["begin"]
+        var end = getDayDict["end"]
+
+
+        $(function () {
+            $("#begin").val(begin);
+            $("#end").val(end);
+            getDayCountIP();
+            getEveryDayIP();
+            getDayCountLogName();
+            getDayCountLogContent();
+        });
+
+
+        $("#subbtn").click(function () {
+            begin = $("#begin").val();
+            end = $("#end").val();
+            getDayCountIP();
+            getEveryDayIP();
+            getDayCountLogName();
+            getDayCountLogContent();
+        });
+
+        function getDayCountIP(){
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getDayCountIP",
+                data:{
+                    begin:begin,
+                    end:end
+                },
+                async:false,
+                success:function(msg){
+                    console.log(msg);
+                    $("#getDayCountIP").empty();
+                    $("#getDayCountIP").append("该时间段独立IP总访问人数: " + msg.day_count_ip);
+                }
+            });
+        };
+
+
+
+        function getEveryDayIP(){
+
+            var Datelist = [];
+            var DayCountIP = [];
+            var DayAloneCountIP = [];
+
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getEveryDayCountIP",
+                data:{
+                    begin:begin,
+                    end:end
+                },
+                async:false,
+                success:function(msg){
+                    console.log(msg);
+                    for (const key in msg) {
+                        Datelist.push(msg[key].name),
+                        DayCountIP.push(msg[key].value)
+                    }
+                }
+            });
+
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getEveryDayAloneCountIP",
+                data:{
+                    begin:begin,
+                    end:end
+                },
+                async:false,
+                success:function(msg){
+                    console.log(msg);
+                    for (const key in msg) {
+                        DayAloneCountIP.push(msg[key].value)
+                    }
+                }
+            });
+
+
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChartgetEveryDayIP.setOption({
+                title: {
+                    left: 'center',
+                    text: '每日访问IP总数和独立IP用户数据'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    top: '5%',
+                    data: ['IP总数', '独立IP']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Datelist
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: 'IP总数',
+                        type: 'line',
+                        stack: '总量',
+                        data: DayCountIP
+                    },
+                    {
+                        name: '独立IP',
+                        type: 'line',
+                        stack: '总量',
+                        data: DayAloneCountIP
+                    }
+                ]
+            });
+        };
+
+
+
+
+        function getDayCountLogName(){
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getDayCountLogName",
+                data:{
+                    begin:begin,
+                    end:end
+                },
+                async:false,
+                success:function(msg){
+                    msg = msg.slice(0,10)
+                    data_name = []
+                    data_value = []
+                    for (const key in msg) {
+                        data_name.push(msg[key].name),
+                        data_value.push(msg[key].value)
+                    }
+                }
+            });
+            // 使用刚指定的配置项和数据显示图表。
+            myChartgetDayCountLogName.setOption({
+                title: {
+                    left: 'center',
+                    text: '获取指定日期范围的独立ip访问数LogName'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: data_name
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    data: data_value,
+                    type: 'line'
+                }]
+            });
+        };
+
+
+
+        function getDayCountLogContent(){
+            $.ajax({
+                type:"post",
+                url:"/benjamin/getDayCountLogContent",
+                data:{
+                    begin:begin,
+                    end:end
+                },
+                async:false,
+                success:function(msg){
+                    x_list = msg;
+                    console.log(msg);
+                }
+            });
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChartgetDayCountLogContent.setOption({
+                title: {
+                    left: 'center',
+                    text: '获取指定日期范围的独立ip访问数LogContent'
+                },
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    top: '5%',
+                    left: 'center'
+                },
+                series: [
+                    {
+                        name: '访问来源',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '40',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: x_list
+                    }
+                ]
+            });
+
+
+        };
+
+
+        function getDayDict(){
+            var myDate = new Date;
+            // 默认前7天
+            var beginDate = new Date(myDate.getTime() - 7*24*60*60*1000);
+            var endDate = new Date(myDate.getTime() + 24*60*60*1000);
+
+            var beginMonth = beginDate.getMonth() + 1;
+            var endMonth = endDate.getMonth() + 1;
+
+            var begin = beginDate.getFullYear() + "-" + beginMonth + "-" + beginDate.getDate();
+            var end = endDate.getFullYear() + "-" + endMonth + "-" + endDate.getDate();
+
+            var result = {}
+            result["begin"] = begin;
+            result["end"] = end;
+
+            return result
+        };
+
+
+
+
+    </script>
+
+
+</body>
+
+</html>
+

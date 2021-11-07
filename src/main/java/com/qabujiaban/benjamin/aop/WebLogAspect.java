@@ -17,14 +17,23 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 
-@Aspect
-@Component
+
+/*
+    日志打印和拦截器功能冲突 WebLogAspect loginAuth
+ */
+
+
+//@Aspect
+//@Component()
 public class WebLogAspect {
-//    private Logger logger = LoggerFactory.getLogger(getClass());
+
     private static Logger logger = Logger.getLogger(WebLogAspect.class);
+
     @Pointcut("execution(public * com.qabujiaban.benjamin..*.*(..))")
     public void webLog() {
     }
+
+
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
         // 接收到请求，记录请求内容
@@ -48,5 +57,6 @@ public class WebLogAspect {
         logger.info("RESPONSE : " + ret);
         logger.info("############### Request End ###################");
     }
+
 
 }

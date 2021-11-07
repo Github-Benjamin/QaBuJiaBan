@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>留言管理</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js" ></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+
+    <style>
+        table
+        {
+            table-layout:fixed;
+        }
+        td
+        {
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            overflow:hidden;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div>
+    <div class="col-md-10">
+        <h2>留言管理
+            <a class="btn btn-danger" id="batchdel" onclick="deleteSelect()">批量删除</a>
+        </h2>
+        <hr>
+    </div>
+
+    <br><br>
+
+    <table class="table table-hover" style="text-align: center">
+        <thead>
+            <tr>
+                <th  style="text-align: center"> <input id="selectAll" type="checkbox" onclick="seltAll()"></th>
+                <th style="text-align: center">ID</th>
+                <th style="text-align: center">用户名</th>
+                <th style="text-align: center">留言内容</th>
+                <th style="text-align: center">城市</th>
+                <th style="text-align: center">时间</th>
+                <th style="text-align: center">状态</th>
+                <th style="text-align: center">操作</th>
+            </tr>
+        </thead>
+
+        <tbody id="pageData">
+            <tr><td colspan=8></td></tr>
+        </tbody>
+
+    </table>
+
+
+    <div>
+        <ul class="pagination pagination-sm" id="setPageNum">
+        </ul>
+    </div>
+
+
+
+</div>
+
+
+
+
+<!-- 信息删除确认 -->
+<div class="modal fade" style="margin-top: 5%" id="ShowupdateMessage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="UPPassWordLabe">修改留言状态</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="input-group" style="padding: 20px 0px 30px 0px">
+                    <input id="inc1" name="message_status" type="radio" class="custom-control-input" value="1">启用
+                    <input id="inc0" name="message_status" type="radio" class="custom-control-input" value="0">未启用
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span aria-hidden="true"></span>关闭</button>
+                    <button type="submit" id="btn_submit" class="btn btn-primary" data-dismiss="modal"><span aria-hidden="true"></span>保存</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    var pageNum = null;
+    var totalPages = null;
+    var messageList = [];
+    var id = null;
+
+    // 页面默认启动加载数据
+    $(function () {
+        getMessageInfo();
+    });
+
+
+
+    // 获取页面数据
+    function getMessageInfo(pageNum=1) {
+        $.ajax({
+            type: "POST",
+            url: 'getMessagePageInfo',
+            async:false,
+            data: {
+                pageNum:pageNum,
+            },
+            success: function (data) {
+                pageNum = data.pageNum;
+                totalPages = data.totalPages;
+                messageList = data.message;
+            },
+            error: function (data) {
+                alert("系统错误，删除失败");
+            }
+        });
+
+        setPageNum(pageNum,totalPages);
+        setPageData(messageList);
+
+    }
+
+
+    // 设置页面数据
+    function setPageData(messageList) {
+        if(messageList.length == 0){
+            var html = "<tr><td colspan=8>暂无数据</td></tr>";
+        }else{
+            var html = null;
+            var editId = null;
+            for (const key in messageList) {
+                html += "<tr id=\"tr"+ messageList[key].id  +"\">"
+                html += "<td><input value=\""+  messageList[key].id + "\" type=\"checkbox\" name=\"chckBox\"></td>",
+                html += "<td>" + messageList[key].id + "</td>",
+                html += "<td>" + messageList[key].message_user + "</td>",
+                html += "<td title=\""+ messageList[key].message_content  +"\">" + messageList[key].message_content + "</td>",
+                html += "<td>" + messageList[key].message_city + "</td>",
+                html += "<td>" + messageList[key].message_time + "</td>",
+                html += "<td id=\"message_status"+  messageList[key].id  +"\">" + messageList[key].message_status + "</td>",
+                editId = messageList[key].id +  ","  +  messageList[key].message_status,
+                html += "<td>" +
+                            "<a href=\"#\" onclick=\"ShowupdateMessage(" + editId  + ")\" id='+ editId +'>修改 </a>" +
+                            "<a href=\"#\" onclick=\"deleteMessageId(" + messageList[key].id + ")\">删除</a>" +
+                        "</td>" +
+                    "</tr>"
+            }
+        }
+        $("#pageData").html(html);
+    }
+
+
+    // 设置分页信息
+    function setPageNum(pageNum,totalPages) {
+
+        // 上一页
+        if(pageNum-1 < 1){
+            var beginHtml = "<li><a href=\"#\" onclick=\"getMessageInfo(1)\">&laquo;</a></li>";
+        }else {
+            var setPage = parseInt(pageNum) - 1;
+            var beginHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ setPage +")\">&laquo;</a></li>";
+        }
+
+        // 下一页
+        if( pageNum+1 >= totalPages){
+            var endHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ totalPages +")\">&raquo;</a></li>";
+        }else {
+            var setPage = parseInt(pageNum) + 1;
+            var endHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ setPage +")\">&raquo;</a></li>";
+        }
+
+        // 分页   <1.2.3>   <15……18>
+        if(  totalPages <= 10 ){
+            for( var i = 1; i <= totalPages ; i += 1 ){
+                if(i == pageNum){
+                    beginHtml += "<li class=\"active\"><a href=\"#\ onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                }else {
+                    beginHtml += "<li><a href=\"#\" onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                }
+            }
+        }else {
+            var benginPage = pageNum - 5;
+            var endPage = pageNum + 5;
+            if(benginPage <=0){
+                benginPage = 1;
+            }
+            if(endPage => pageNum){
+                endPage = totalPages
+            }
+
+            for(benginPage; i<= endPage; benginPage+=1 ){
+                if(i == pageNum){
+                    beginHtml += "<li class=\"active\"><a href=\"#\ onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                }else {
+                    beginHtml += "<li><a href=\"#\" onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+                }
+            }
+
+        }
+
+        // 分页数据初版，1，2,3
+        // for( var i = 1; i <= totalPages ; i += 1 ){
+        //     if(i == pageNum){
+        //         beginHtml += "<li class=\"active\"><a href=\"#\ onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+        //     }else {
+        //         beginHtml += "<li><a href=\"#\" onclick=\"getMessageInfo( "+ i + ")\" >" + i +"</a></li>"
+        //     }
+        // }
+
+
+        $("#setPageNum").html(beginHtml+endHtml);
+
+
+    }
+
+
+    // 删除数据
+    function deleteMessageId(id){
+        $.ajax({
+            type: "POST",
+            url: 'deleteMessageId',
+            async:false,
+            data: {
+                id:id,
+            },
+            success: function (data) {
+                $("#tr"+id).remove();
+                alert("操作:" + data.message);
+            },
+            error: function (data) {
+                alert("系统错误，删除失败");
+            }
+        });
+    }
+
+
+    // 显示修改弹窗
+    function ShowupdateMessage(selectId,message_status) {
+
+        if(message_status ==1){
+            $("#inc1").attr("checked","checked");
+            $("#inc0").removeAttr("checked");
+        }else {
+            $("#inc0").attr("checked","checked");
+            $("#inc1").removeAttr("checked");
+        }
+        id = selectId;
+        $("#ShowupdateMessage").modal();
+    }
+
+
+    // 修改弹窗
+    $("#btn_submit").click(function () {
+        var message_status = $('input[name=message_status]:checked').val();
+        $.ajax({
+            type: "POST",
+            url: 'updateMessage',
+            async:false,
+            data: {
+                id:id,
+                message_status:message_status
+            },
+            success: function (data) {
+                $("#message_status"+id).text(message_status);
+                $( id + message_status ).attr("onclick","ShowupdateMessage("+ id + "," + message_status +")");
+            },
+            error: function (data) {
+                alert("系统错误，删除失败");
+            }
+        });
+    });
+
+
+    //批量选择checkbox
+    function seltAll() {
+        var chckBoxSign = document.getElementById("selectAll");       //ckb 全选/反选的选择框id
+        var chckBox = document.getElementsByName("chckBox");    //所有的选择框其那么都是chckBox
+        var num = chckBox.length;
+        if (chckBoxSign.checked) {
+            for (var index = 0; index < num; index++) {
+                chckBox[index].checked = true;
+            }
+        } else {
+            for (var index = 0; index < num; index++) {
+                chckBox[index].checked = false;
+            }
+        }
+    }
+
+    //批量删除数据
+    function deleteSelect() {
+        var chckBox = document.getElementsByName("chckBox");
+        var num = chckBox.length
+        var batchdelid = "";
+        for (var index = 0; index < num; index++) {
+            if (chckBox[index].checked) {
+                batchdelid += chckBox[index].value + ",";
+            }
+        }
+
+        if (batchdelid != "") {
+            if (window.confirm("确定删除所选记录？")) {
+                $.ajax({
+                    type: "POST",
+                    url: 'deleteManyMessageId',
+                    dataType: 'json',
+                    data: {
+                        idList: batchdelid.substring(0,batchdelid.length - 1)
+                    },
+                    success: function (data) {
+                        if (data["success"]) {
+                            alert("删除成功");
+                            location.reload();
+                        }
+                    },
+                    error: function (data) {
+                        alert("系统错误，删除失败");
+                    }
+                });
+            }
+        }else {
+            alert("请选择要删除的记录");
+        }
+    }
+
+
+</script>
+
+<script type="text/javascript" src="js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站管理后台</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js" ></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="nav navbar-inverse" role="navigotion" style="background:black">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a href="/" class="navbar-brand">《QA不加班》网站管理后台</a>
+        </div>
+
+        <ul class="nav navbar-nav  navbar-right">
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span>Benjamin<b class="caret"></b></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">个人信息</a></li>
+                    <li><a href="#">修改密码</a></li>
+                    <li><a href="#">退出</a></li>
+                </ul>
+            </li>
+        </ul>
+
+    </div>
+</nav>
+
+
+<div style="height: 15px"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <ul id="main-nav" class="nav nav-tabs nav-stacked collapse navbar-collapse">
+
+                <li class="active">
+                    <a href="admin">首页</a>
+                </li>
+
+                <li>
+                    <a href="#" class="addmeu" data-href="backMessage">&nbsp;留言管理</a>
+                </li>
+
+                <li>
+                    <a href="#"  class="addmeu" data-href="GetAllUSerCount"></i>&nbsp;总览图表统计</a>
+                </li>
+                <li>
+                    <a href="#"  class="addmeu" data-href="GetDayUserCount"></i>&nbsp;单日图表统计</a>
+                </li>
+
+                <li>
+                    <a href="#" onclick="about()"></i>&nbsp;关于系统</a>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="col-md-10 column">
+            <div class="addpage">
+                <img style="width: 100%" id="aboutImg" src="https://pic.rmb.bdstatic.com/be4d6d6f30b77cc410f26f6dd6809b11.jpeg" alt="">
+          </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div style="height: 50px"></div>
+<div class="footer navbar-fixed-bottom"  style="background: black">
+    <div style="height: 15px"></div>
+    <ul class="list-inline text-center">
+        <li style="color: snow;font-size: 20px">
+            <a href="https://github.com/Github-Benjamin" target="_blank">Copyright ©2017.Benjamin Software All Rights Reserved.</a>
+        </li>
+    </ul>
+</div>
+<div style="height: 15px"></div>
+
+<script type="text/javascript" src="js/main.js"></script>
+
+
+<script type="text/javascript" language="javascript">
+
+
+    function iFrameHeight() {
+        var ifm= document.getElementById("iframe-page-content");
+        var subWeb = document.frames ? document.frames["iframe-page-content"].document :
+            ifm.contentDocument;
+        if(ifm != null && subWeb != null) {
+            ifm.height = subWeb.body.scrollHeight+220;
+        }
+    }
+
+    function about(){
+        $("#aboutImg").attr("src","img/aboutinfo.png");
+    }
+
+
+</script>
+
+</body>
+</html>

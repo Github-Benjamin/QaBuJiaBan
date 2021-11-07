@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>《QA不加班》后台登陆页面</title>
+    <meta name="description" content="particles.js is a lightweight JavaScript library for creating particles.">
+    <meta name="author" content="Vincent Garreau" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" media="screen" href="css/login.css">
+</head>
+<body>
+
+
+<div id="particles-js" style="display: flex;align-items: center;justify-content: center">
+</div>
+<div class="login-page">
+    <div class="login-content">
+        <div class="login-tit">登录</div>
+        <div class="login-input">
+            <input type="text" id="username" placeholder="用户名/手机号">
+        </div>
+        <div class="login-input">
+            <input type="password" id="password" placeholder="密码">
+        </div>
+        <div class="login-btn">
+            <div class="login-btn-left">
+                <span id="btn_submit">登录</span>
+            </div>
+            <div class="login-btn-right" onClick="changeImg()">
+                <img src="img/check.png" alt="" id="picture"> 记住密码
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- scripts -->
+<script type="text/javascript" src="js/jquery-3.1.1.min.js" ></script>
+<script src="js/particles.js"></script>
+<script src="js/app.js"></script>
+<script>
+
+
+    function changeImg(){
+        let pic = document.getElementById('picture');
+        console.log(pic.src)
+        if(pic.getAttribute("src",2) =="img/check.png"){
+            pic.src ="img/checked.png"
+        }else{
+            pic.src ="img/check.png"
+        }
+    }
+
+
+    // 修改弹窗
+    $("#btn_submit").click(function () {
+
+        var username = $("#username").val();
+        var password = $("#password").val();
+
+
+        $.ajax({
+            type: "POST",
+            url: 'LoginAuth',
+            async:false,
+            data: {
+                username:username,
+                password:password
+            },
+            success: function (data) {
+                if(data.message == "成功"){
+                    window.location.href = "admin"
+                }else {
+                    alert("登陆失败");
+                }
+            },
+            error: function (data) {
+                alert("系统错误，删除失败");
+            }
+        });
+    });
+
+
+</script>
+</body>
+</html>
