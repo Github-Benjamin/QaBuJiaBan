@@ -69,7 +69,11 @@ public class ImageVerifyController {
     public Map<String, String> verify(TestVo testVo, ServletWebRequest servletWebRequest, HttpServletRequest request) {
 
         // 获取用户请求的ip并解析ip所在的省份
-        testVo.setMessage_ip(GetIPCity.GetRequestIP(request));
+        String message_ip = GetIPCity.GetRequestIP(request);
+        testVo.setMessage_ip(message_ip);
+        // 解析ip  可能存在获取失败的问题修复
+        testVo.setMessage_city(GetIPCity.GetRequestCity(message_ip));
+
         final ImageVerify.ImageCode imageCode = (ImageVerify.ImageCode) sessionStrategy.getAttribute(servletWebRequest, SESSION_KEY_IMAGE_CODE);
 
         Map<String, String> m = new HashMap<>();
@@ -96,8 +100,8 @@ public class ImageVerifyController {
         }
 
         sessionStrategy.removeAttribute(servletWebRequest, SESSION_KEY_IMAGE_CODE);
-        // 解析ip  可能存在获取失败的问题修复
-        testVo.setMessage_city(GetIPCity.GetRequestCity(GetIPCity.GetRequestIP(request)));
+
+
 
         // 评论数据，写入数据库;
         messageService.MessageInsert(testVo);

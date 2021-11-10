@@ -27,7 +27,7 @@ public class GetIPCity {
         key
         return province city
      */
-    private static String url = "https://restapi.amap.com/v3/ip";
+    private static String url = "http://restapi.amap.com/v3/ip";
     private static String key = "c046e5c67c97e1555532b8586173f01c";
 
 
@@ -73,10 +73,11 @@ public class GetIPCity {
     public static String GetRequestCity(String requestIP){
             //1.生成HttpClient对象并设置参数
             HttpClient httpClient = new HttpClient();
+            httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(600);
 
             //2.生成GetMethod对象并设置参数
-            url = url + "?key=" + key + "&ip=" + requestIP;
-            GetMethod getMethod = new GetMethod(url);
+            String req_url = url + "?key=" + key + "&ip=" + requestIP;
+            GetMethod getMethod = new GetMethod(req_url);
 
             String response = "";
             //3.执行HTTP GET 请求

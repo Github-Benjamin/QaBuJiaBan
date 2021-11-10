@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <script type="text/javascript" src="js/jquery-3.1.1.min.js" ></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
+
     <style>
         table
         {
@@ -13,9 +14,10 @@
         }
         td
         {
-            text-overflow:ellipsis;
-            white-space:nowrap;
             overflow:hidden;
+            text-overflow:ellipsis;
+            -webkit-line-clamp:3;
+            -webkit-box-orient:vertical;
         }
     </style>
 </head>
@@ -42,6 +44,8 @@
         </ul>
     </div>
 </nav>
+
+
 
 
 <div class="container-fluid">
@@ -169,7 +173,7 @@
                     html += "<td>" + messageList[key].message_user + "</td>",
                     html += "<td title=\""+ messageList[key].message_content  +"\">" + messageList[key].message_content + "</td>",
                     html += "<td>" + messageList[key].message_city + "</td>",
-                    html += "<td>" + messageList[key].message_time + "</td>"
+                    html += "<td>" + messageList[key].message_time + "</td></tr>"
                 }
             }
             $("#pageData").html(html);
@@ -196,9 +200,6 @@
                 var setPage = parseInt(pageNum) + 1;
                 var endHtml = "<li><a href=\"#\" onclick=\"getMessageInfo("+ setPage +")\">&raquo;</a></li>";
             }
-
-
-
 
             // 分页   <1.2.3>   <15……18>
             if(  totalPages <= 10 ){
@@ -252,7 +253,7 @@
                     },
                     success: function (result) {
                         if (result.message == "成功") {
-                            alert("提交： " + result.message );
+                            alert("提交： " + result.message  + "!\n待审核后展示留言数据");
                         } else {
                             alert("\n提交失败： " + result.message + "\n\n请重新点击验证码图片刷新输入");
                         }

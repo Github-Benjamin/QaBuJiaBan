@@ -31,10 +31,19 @@ public interface MessageMapper {
     @Select("SELECT count(*) from message where message_status = 1")
     int getAllMessageStatus();
 
-    // 前台 分页查询
+    // 前台 分页查询 Status = 1
     // select * from table LIMIT 5,10
     @Select("SELECT * from message where message_status = 1 order by id desc LIMIT #{begin},#{end}")
     List<Message> getMessageStatus(@Param("begin")Integer begin, @Param("end")Integer end);
+
+    // 前台分页管理 不审核直接显示
+    @Select("SELECT message_manage from message_manage where id = 1")
+    String getMessageManageStatus();
+
+    // 管理 前台留言是否未审核 1是开启审核，0是关闭审核
+    @Select("update message_manage SET message_manage = #{message_manage} where id = 1")
+    void updateMessageManageStatus(@Param("message_manage")String message_manage);
+
 
 
     /*

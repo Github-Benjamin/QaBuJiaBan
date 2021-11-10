@@ -17,8 +17,8 @@ import java.util.Map;
 @RestController
 public class AdminLoginController {
 
-    private static String[] usernameList = {"admin","root"};
-    private static String[] passwordList = {"123","root"};
+    private static String[] usernameList = {"benjamin","QAbujiaban"};
+    private static String[] passwordList = {"benjamin123","QAbujiaban123"};
 
 
     // 编辑

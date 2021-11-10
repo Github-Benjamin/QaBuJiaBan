@@ -69,7 +69,7 @@ public class MessageController {
     }
 
 
-    // 编辑
+    // 编辑 单个留言审核状态
     @RequestMapping("/updateMessage")
     public Map<String, String> updateMessage(Integer message_status, Integer id){
         messageService.updateMessage(message_status,id);
@@ -78,5 +78,19 @@ public class MessageController {
         m.put("message", "成功");
         return m;
     }
+
+
+    // 编辑 整个留言审核状态
+    @RequestMapping("/updateMessageManageStatus")
+    public Map<String, String> updateMessageManageStatus(String message_manage){
+        messageService.updateMessageManageStatus(message_manage);
+
+        Map<String, String> m = new HashMap<>();
+        m.put("message", "成功");
+        return m;
+    }
+
+
+
 
 }

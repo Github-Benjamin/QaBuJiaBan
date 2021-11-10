@@ -4,6 +4,7 @@ import com.qabujiaban.benjamin.message.entity.TestVo;
 import com.qabujiaban.benjamin.message.entity.Message;
 import com.qabujiaban.benjamin.message.entity.PageInfo;
 import com.qabujiaban.benjamin.message.maaper.MessageMapper;
+import com.qabujiaban.benjamin.message.util.SetHtmlString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,23 +28,42 @@ public class MessageService {
     // 添加事务回滚
     @Transactional
     public Message MessageInsert(TestVo testVo){
-        messageMapper.MessageInsert(testVo.getMessage_user(),
-                                    testVo.getMessage_content(),
-                                    testVo.getMessage_ip(),
-                                    testVo.getMessage_city());
+        String user = testVo.getMessage_user();
+        String content = testVo.getMessage_content();
+
+        user = SetHtmlString.setHtmlString(user);
+        content = SetHtmlString.setHtmlString(content);
+
+        if (user.length() <= 255){
+            messageMapper.MessageInsert(user,
+                                        content,
+                                        testVo.getMessage_ip(),
+                                        testVo.getMessage_city());
+
+        }
         return null;
+
+
+
     }
 
     /*
         前台
      */
     private int getAllMessageStatus(){
-        int count =messageMapper.getAllMessageStatus();
+        if(messageMapper.getMessageManageStatus().equals("True")){
+            int count =messageMapper.getAllMessageStatus();
+        }
+        int count =messageMapper.getAllMessage();
         return count;
     }
 
     private List<Message> getMessageStatus(Integer begin, Integer end){
-        return messageMapper.getMessageStatus(begin,end);
+        if(messageMapper.getMessageManageStatus().equals("True")){
+            return messageMapper.getMessageStatus(begin,end);
+        }
+        return  messageMapper.getMessage(begin,end);
+
     }
 
     public PageInfo getMessageStatusPageInfo(Integer pageNum){
@@ -112,10 +132,16 @@ public class MessageService {
     }
 
 
-    // 编辑
+    // 编辑 单个留言审核状态
     @Transactional
     public void updateMessage(Integer message_status,Integer  id){
         messageMapper.updateMessage(message_status,id);
+    }
+
+    // 编辑 整个留言审核状态
+    @Transactional
+    public void updateMessageManageStatus(String message_manage){
+        messageMapper.updateMessageManageStatus(message_manage);
     }
 
 
